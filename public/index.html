@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PageTurner — Online Bookstore & E-Store</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fdf4f0',
+              100: '#fbe7de',
+              200: '#f7cfbe',
+              300: '#f1ad94',
+              400: '#e87f62',
+              500: '#df5c3a',
+              600: '#cc4323',
+              700: '#aa3319',
+              800: '#8c2c18',
+              900: '#732819',
+            },
+            accent: {
+              50: '#f0f9ff',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985'
+            }
+          },
+          fontFamily: {
+            serif: ['Merriweather', 'Georgia', 'serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Google Fonts & Lucide Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- Top Announcement Bar -->
+  <div class="bg-slate-900 text-slate-300 text-xs py-2 px-4 text-center border-b border-slate-800 flex justify-between items-center max-w-7xl mx-auto w-full">
+    <div class="hidden sm:flex items-center space-x-2">
+      <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      <span>48-Hour Free Cancellation Guarantee on All Books</span>
+    </div>
+    <div class="mx-auto sm:mx-0 font-medium text-amber-300 flex items-center space-x-2">
+      <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+      <span>Free Priority Delivery on Orders Over $35 + Earn 5% Gift Points</span>
+    </div>
+    <div class="hidden md:flex items-center space-x-4 text-slate-400">
+      <button onclick="app.quickSwitchUser('user-1')" class="hover:text-white transition">Demo: Jane Doe (480 pts)</button>
+      <span>•</span>
+      <button onclick="app.quickSwitchUser('user-2')" class="hover:text-white transition">Demo: Alex Rivera (150 pts)</button>
+    </div>
+  </div>
+
+  <!-- Header / Navigation -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 sm:h-20 gap-4">
+        
+        <!-- Brand Logo -->
+        <a href="javascript:void(0)" onclick="app.navigate('home')" class="flex items-center space-x-3 group">
+          <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-tr from-brand-600 to-amber-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform">
+            <i data-lucide="book-marked" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <span class="text-xl sm:text-2xl font-serif font-bold tracking-tight text-slate-900">Page<span class="text-brand-600">Turner</span></span>
+            <span class="hidden sm:block text-[10px] uppercase font-bold tracking-widest text-slate-400 -mt-1">Bookstore & E-Store</span>
+          </div>
+        </a>
+
+        <!-- Global Search Bar -->
+        <div class="flex-1 max-w-xl mx-2 hidden sm:block">
+          <div class="relative">
+            <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+            <input 
+              type="text" 
+              id="globalSearchInput"
+              placeholder="Search by book title, author, keyword, or ISBN..." 
+              class="w-full pl-10 pr-4 py-2.5 rounded-full bg-slate-100 border border-transparent focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-500/20 text-sm transition outline-none"
+              onkeyup="if(event.key==='Enter') app.performSearch(this.value)"
+            >
+          </div>
+        </div>
+
+        <!-- Navigation Actions -->
+        <div class="flex items-center space-x-1 sm:space-x-3">
+          
+          <!-- Catalogue Quick Link -->
+          <button onclick="app.navigate('catalogue')" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-brand-600 hover:bg-slate-100 transition flex items-center space-x-1.5">
+            <i data-lucide="grid" class="w-4 h-4"></i>
+            <span class="hidden md:inline">Catalogue</span>
+          </button>
+
+          <!-- Order History with Badge -->
+          <button onclick="app.navigate('orders')" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-brand-600 hover:bg-slate-100 transition flex items-center space-x-1.5">
+            <i data-lucide="package" class="w-4 h-4"></i>
+            <span class="hidden md:inline">Orders</span>
+          </button>
+
+          <!-- User Account / Login Button -->
+          <div id="userHeaderSection" class="relative">
+            <!-- Dynamically rendered by app.renderUserHeader() -->
+          </div>
+
+          <!-- Shopping Basket Button -->
+          <button onclick="app.toggleCartDrawer(true)" class="relative p-2.5 rounded-xl bg-slate-100 hover:bg-brand-50 text-slate-800 hover:text-brand-600 transition flex items-center justify-center">
+            <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+            <span id="cartBadgeCount" class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-brand-600 text-white text-[11px] font-bold flex items-center justify-center ring-2 ring-white shadow-sm">0</span>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Mobile Search Bar -->
+      <div class="pb-3 sm:hidden">
+        <div class="relative">
+          <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+          <input 
+            type="text" 
+            placeholder="Search books, authors..." 
+            class="w-full pl-10 pr-4 py-2 rounded-full bg-slate-100 text-sm outline-none border border-slate-200"
+            onkeyup="if(event.key==='Enter') app.performSearch(this.value)"
+          >
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Interactive Customer Journey Stepper Indicator (Visual Roadmap) -->
+  <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white text-xs py-2.5 px-4 shadow-inner">
+    <div class="max-w-7xl mx-auto flex items-center justify-between overflow-x-auto no-scrollbar gap-4 text-nowrap">
+      <div class="flex items-center space-x-2 font-medium text-slate-400">
+        <span class="px-2 py-0.5 rounded bg-brand-600 text-white font-bold text-[10px]">JOURNEY MAP</span>
+        <span>12 Customer Touchpoints:</span>
+      </div>
+      <div class="flex items-center space-x-3 text-[11px]">
+        <button onclick="app.navigate('home')" class="hover:text-amber-400 transition flex items-center space-x-1 text-amber-300">
+          <span class="w-4 h-4 rounded-full bg-amber-400/20 text-amber-300 inline-flex items-center justify-center font-bold text-[9px]">1-3</span>
+          <span>E-Store Home & Buy It Again</span>
+        </button>
+        <span class="text-slate-600">→</span>
+        <button onclick="app.navigate('catalogue')" class="hover:text-amber-400 transition flex items-center space-x-1 text-slate-300">
+          <span class="w-4 h-4 rounded-full bg-cyan-400/20 text-cyan-300 inline-flex items-center justify-center font-bold text-[9px]">5-8</span>
+          <span>Categories, Brands & Delivery Date</span>
+        </button>
+        <span class="text-slate-600">→</span>
+        <button onclick="app.openCheckoutModal()" class="hover:text-amber-400 transition flex items-center space-x-1 text-slate-300">
+          <span class="w-4 h-4 rounded-full bg-emerald-400/20 text-emerald-300 inline-flex items-center justify-center font-bold text-[9px]">9-12</span>
+          <span>Address, Points & 48h Cancel</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main View Container -->
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    
+    <!-- VIEW: Home (Journey 1, 2, 3) -->
+    <div id="viewHome" class="space-y-10">
+      
+      <!-- Hero Banner -->
+      <section class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-slate-900 via-brand-950 to-slate-900 text-white p-8 sm:p-12 shadow-xl border border-slate-800">
+        <div class="relative z-10 max-w-2xl space-y-4">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brand-500/20 border border-brand-500/30 text-brand-300 text-xs font-semibold">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span>Curated Online Bookstore Experience</span>
+          </div>
+          <h1 class="text-3xl sm:text-5xl font-serif font-bold tracking-tight leading-tight">
+            Discover stories that shape your <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-brand-400">world & mind.</span>
+          </h1>
+          <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+            Browse premium bestsellers, award-winning publishers, and tech masterclasses. Fast delivery with real-time tentative date estimates and gift point rewards.
+          </p>
+          <div class="pt-2 flex flex-wrap gap-3">
+            <button onclick="app.navigate('catalogue')" class="px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-sm shadow-lg shadow-brand-600/30 transition flex items-center space-x-2">
+              <span>Explore Full Catalogue</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+            <button onclick="app.openLoginModal()" class="px-5 py-3 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 font-medium text-sm border border-slate-700 transition flex items-center space-x-2">
+              <i data-lucide="user" class="w-4 h-4"></i>
+              <span>User Authentication</span>
+            </button>
+          </div>
+        </div>
+        <!-- Decorative Background Element -->
+        <div class="absolute -right-10 -bottom-10 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      </section>
+
+      <!-- Customer Journey Step 3: Access Product Catalogue for Each Category -->
+      <section class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl sm:text-2xl font-serif font-bold text-slate-900 flex items-center space-x-2">
+              <span>Explore by Category</span>
+              <span class="text-xs font-sans px-2 py-0.5 rounded-full bg-brand-100 text-brand-700 font-semibold">Step 3 & 5</span>
+            </h2>
+            <p class="text-sm text-slate-500">Pick a category to filter our extensive literary and technical collection</p>
+          </div>
+          <button onclick="app.navigate('catalogue', { category: 'all' })" class="text-sm font-semibold text-brand-600 hover:text-brand-700 flex items-center space-x-1">
+            <span>View All</span>
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div id="categoryCardsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+          <!-- Dynamically populated categories -->
+        </div>
+      </section>
+
+      <!-- Customer Journey Step 2: "Buy It Again" Section (from Order History) -->
+      <section id="buyItAgainSection" class="space-y-4 bg-amber-50/60 rounded-3xl p-6 sm:p-8 border border-amber-200/60">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="inline-flex items-center space-x-1.5 text-xs font-bold text-amber-800 uppercase tracking-wider mb-1">
+              <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+              <span>Customer Journey Step 2</span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-serif font-bold text-slate-900">Buy It Again</h2>
+            <p class="text-sm text-slate-600">Quickly reorder books from your past purchases with 1-click add to basket</p>
+          </div>
+          <button onclick="app.navigate('orders')" class="text-sm font-semibold text-amber-800 hover:underline">
+            View All Past Orders
+          </button>
+        </div>
+
+        <div id="buyItAgainContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Rendered by app.renderBuyItAgain() -->
+        </div>
+      </section>
+
+      <!-- Customer Journey Step 2: Recommendations based on Order History -->
+      <section class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="inline-flex items-center space-x-1.5 text-xs font-bold text-brand-600 uppercase tracking-wider mb-1">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              <span>Personalized For You (Step 2)</span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-serif font-bold text-slate-900" id="recommendationsHeading">
+              Recommended Based on Your Order History
+            </h2>
+            <p class="text-sm text-slate-500">Handpicked selections matching your reading preferences</p>
+          </div>
+        </div>
+
+        <div id="recommendationsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- Rendered by app.renderRecommendations() -->
+        </div>
+      </section>
+
+      <!-- Customer Journey Step 6: Browse the Brands / Publishers -->
+      <section class="space-y-4 pt-4 border-t border-slate-200">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl sm:text-2xl font-serif font-bold text-slate-900 flex items-center space-x-2">
+              <span>Featured Publisher Brands</span>
+              <span class="text-xs font-sans px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-semibold">Step 6</span>
+            </h2>
+            <p class="text-sm text-slate-500">Filter books by world-leading publishing houses and imprints</p>
+          </div>
+        </div>
+
+        <div id="brandsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+          <!-- Rendered by app.renderBrands() -->
+        </div>
+      </section>
+
+    </div>
+
+    <!-- VIEW: Catalogue (Journey 5, 6, 7, 8) -->
+    <div id="viewCatalogue" class="space-y-6 hidden">
+      
+      <!-- Catalogue Header & Filters -->
+      <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-serif font-bold text-slate-900">Book Catalogue</h1>
+            <p class="text-sm text-slate-500">Select categories, browse brands, check delivery dates, and add to basket</p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <span class="text-xs text-slate-500 font-medium">Sort by:</span>
+            <select id="catalogueSort" onchange="app.fetchAndRenderBooks()" class="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm font-medium text-slate-700 outline-none focus:border-brand-500">
+              <option value="featured">Featured & Best Rated</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+              <option value="discount">Biggest Discount</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Filter Controls: Categories & Brands -->
+        <div class="space-y-3 pt-2 border-t border-slate-100">
+          
+          <!-- Category Filters (Step 5) -->
+          <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1">Categories:</span>
+            <div id="categoryFilterPills" class="flex items-center gap-1.5">
+              <!-- Rendered by app -->
+            </div>
+          </div>
+
+          <!-- Brand / Publisher Filters (Step 6) -->
+          <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1">Publishers:</span>
+            <div id="brandFilterPills" class="flex items-center gap-1.5">
+              <!-- Rendered by app -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Books Grid -->
+      <div id="catalogueBooksGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Rendered by app.renderCatalogueBooks() -->
+      </div>
+
+    </div>
+
+    <!-- VIEW: Orders & Cancellation (Journey 2, 12) -->
+    <div id="viewOrders" class="space-y-6 hidden">
+      
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center space-x-1.5 text-xs font-bold text-brand-600 uppercase tracking-wider mb-1">
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+            <span>Customer Journey Step 2 & 12</span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-serif font-bold text-slate-900">Your Orders & History</h1>
+          <p class="text-sm text-slate-500">Track active shipments, cancel orders within 48 hours, and reorder favorites</p>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <div class="px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center space-x-2">
+            <i data-lucide="clock" class="w-4 h-4 text-emerald-600"></i>
+            <span>48-Hour Cancellation Window Active</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="ordersListContainer" class="space-y-4">
+        <!-- Rendered by app.renderOrdersList() -->
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Product Detail Modal (Step 7: Product with Tentative Delivery Date & Related Products) -->
+  <div id="productDetailModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 p-6 sm:p-8 relative">
+      <button onclick="app.closeProductDetailModal()" class="absolute top-5 right-5 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div id="productDetailContent">
+        <!-- Rendered by app.renderProductDetail() -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Shopping Basket Slide-Over Drawer (Step 8) -->
+  <div id="cartDrawer" class="fixed inset-0 z-50 overflow-hidden hidden">
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity" onclick="app.toggleCartDrawer(false)"></div>
+    <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
+      <div class="w-screen max-w-md bg-white shadow-2xl flex flex-col">
+        
+        <!-- Cart Header -->
+        <div class="p-6 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="shopping-bag" class="w-5 h-5 text-brand-600"></i>
+            <h2 class="text-lg font-serif font-bold text-slate-900">Your Basket</h2>
+            <span id="cartDrawerCount" class="text-xs px-2 py-0.5 rounded-full bg-brand-100 text-brand-700 font-bold">0 items</span>
+          </div>
+          <button onclick="app.toggleCartDrawer(false)" class="p-2 rounded-full hover:bg-slate-200 text-slate-500 transition">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Free Delivery Progress Bar -->
+        <div class="bg-amber-50/80 px-6 py-2.5 border-b border-amber-200/60 text-xs">
+          <div id="freeShippingNotice" class="font-medium text-amber-900 flex items-center justify-between mb-1">
+            <span>Free Shipping on $35+</span>
+            <span id="freeShippingRemain">$35.00 away</span>
+          </div>
+          <div class="w-full bg-amber-200/80 rounded-full h-1.5 overflow-hidden">
+            <div id="freeShippingBar" class="bg-amber-600 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Cart Items List -->
+        <div id="cartItemsList" class="flex-1 overflow-y-auto p-6 space-y-4">
+          <!-- Rendered by app.renderCart() -->
+        </div>
+
+        <!-- Cart Footer -->
+        <div class="p-6 border-t border-slate-200 bg-slate-50 space-y-3">
+          <div class="space-y-1.5 text-sm">
+            <div class="flex justify-between text-slate-500">
+              <span>Subtotal</span>
+              <span id="cartSubtotal" class="font-semibold text-slate-900">$0.00</span>
+            </div>
+            <div class="flex justify-between text-slate-500 text-xs">
+              <span>Estimated Delivery</span>
+              <span class="text-emerald-600 font-medium">2-3 Business Days</span>
+            </div>
+          </div>
+
+          <button onclick="app.openCheckoutModal()" id="cartCheckoutBtn" class="w-full py-3.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm shadow-lg shadow-brand-600/30 transition flex items-center justify-center space-x-2">
+            <span>Proceed to Checkout</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkout & Payment Modal (Steps 9, 10, 11, 12) -->
+  <div id="checkoutModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 p-6 sm:p-8 relative">
+      <button onclick="app.closeCheckoutModal()" class="absolute top-5 right-5 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Stepper Header -->
+      <div class="mb-6 border-b border-slate-100 pb-4">
+        <h2 class="text-2xl font-serif font-bold text-slate-900">Secure Checkout</h2>
+        <div class="flex items-center space-x-4 mt-3 text-xs font-semibold">
+          <div id="stepIndicator1" class="flex items-center space-x-1.5 text-brand-600">
+            <span class="w-5 h-5 rounded-full bg-brand-600 text-white flex items-center justify-center text-[10px]">9</span>
+            <span>Delivery Address</span>
+          </div>
+          <span class="text-slate-300">→</span>
+          <div id="stepIndicator2" class="flex items-center space-x-1.5 text-slate-400">
+            <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[10px]">10</span>
+            <span>Payment & Gift Points</span>
+          </div>
+          <span class="text-slate-300">→</span>
+          <div id="stepIndicator3" class="flex items-center space-x-1.5 text-slate-400">
+            <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[10px]">11-12</span>
+            <span>Confirmation</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Checkout Step 1: Address Selection (Step 9) -->
+      <div id="checkoutStepAddress" class="space-y-6">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+              <i data-lucide="map-pin" class="w-4 h-4 text-brand-600"></i>
+              <span>Select Delivery Address</span>
+            </h3>
+            <button onclick="app.toggleNewAddressForm(true)" class="text-xs font-bold text-brand-600 hover:underline flex items-center space-x-1">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>Add New Address</span>
+            </button>
+          </div>
+
+          <div id="savedAddressesContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- Rendered by app.renderSavedAddresses() -->
+          </div>
+
+          <!-- New Address Form (Collapsible) -->
+          <div id="newAddressForm" class="hidden p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+            <div class="font-semibold text-xs text-slate-700">Add New Delivery Location</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <input type="text" id="newAddrName" placeholder="Full Name" class="p-2.5 rounded-xl border border-slate-200 bg-white">
+              <input type="text" id="newAddrPhone" placeholder="Mobile Phone" class="p-2.5 rounded-xl border border-slate-200 bg-white">
+              <input type="text" id="newAddrStreet" placeholder="Street Address / Flat / Floor" class="p-2.5 rounded-xl border border-slate-200 bg-white sm:col-span-2">
+              <input type="text" id="newAddrCity" placeholder="City" class="p-2.5 rounded-xl border border-slate-200 bg-white">
+              <input type="text" id="newAddrState" placeholder="State" class="p-2.5 rounded-xl border border-slate-200 bg-white">
+              <input type="text" id="newAddrZip" placeholder="ZIP / Postal Code" class="p-2.5 rounded-xl border border-slate-200 bg-white">
+              <select id="newAddrType" class="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700">
+                <option value="Home">Home (7am - 9pm)</option>
+                <option value="Work">Office / Work (9am - 6pm)</option>
+              </select>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+              <button onclick="app.toggleNewAddressForm(false)" class="px-3 py-1.5 rounded-lg text-slate-500 hover:bg-slate-200 text-xs font-semibold">Cancel</button>
+              <button onclick="app.saveNewAddress()" class="px-4 py-1.5 rounded-lg bg-brand-600 text-white text-xs font-bold hover:bg-brand-500">Save Address</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-4 border-t border-slate-100">
+          <button onclick="app.proceedToPaymentStep()" class="px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm shadow-md transition flex items-center space-x-2">
+            <span>Continue to Payment & Points</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Checkout Step 2: Payment Options & Redeem Gift Points (Step 10) -->
+      <div id="checkoutStepPayment" class="space-y-6 hidden">
+        
+        <!-- Step 10: Redeem Gift Points Card -->
+        <div class="bg-gradient-to-br from-amber-500/10 via-amber-50 to-orange-500/10 p-5 rounded-2xl border border-amber-200 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <div class="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                <i data-lucide="gift" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-slate-900">Redeem Gift Points</h4>
+                <p class="text-xs text-slate-600">You have <span id="userPointsBalance" class="font-bold text-amber-700">480 Points</span> (Worth $<span id="userPointsDollarValue">24.00</span>)</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <span id="redeemedPointsSavings" class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200">-$0.00 Saved</span>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-3 pt-2">
+            <input 
+              type="range" 
+              id="pointsRedeemSlider" 
+              min="0" 
+              max="480" 
+              step="20" 
+              value="0" 
+              oninput="app.onPointsSliderChange(this.value)"
+              class="w-full accent-amber-600 h-2 bg-amber-200 rounded-lg cursor-pointer"
+            >
+            <span id="pointsSliderLabel" class="text-xs font-bold text-slate-800 whitespace-nowrap min-w-16 text-right">0 pts</span>
+          </div>
+          <div class="flex justify-between text-[11px] text-slate-500">
+            <span>0 Points ($0.00)</span>
+            <button onclick="app.redeemMaxPoints()" class="text-amber-800 font-bold hover:underline">Apply Maximum Allowed</button>
+          </div>
+        </div>
+
+        <!-- Step 10: Initiate Payment Options -->
+        <div class="space-y-3">
+          <h3 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+            <i data-lucide="credit-card" class="w-4 h-4 text-brand-600"></i>
+            <span>Select Payment Method</span>
+          </h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="paymentOptionsContainer">
+            
+            <label class="flex items-start space-x-3 p-4 rounded-2xl border-2 border-brand-500 bg-brand-50/30 cursor-pointer">
+              <input type="radio" name="paymentMethod" value="Credit / Debit Card" checked class="mt-1 accent-brand-600">
+              <div class="space-y-1 text-xs">
+                <span class="font-bold text-slate-900 block text-sm">Credit / Debit Card</span>
+                <span class="text-slate-500 block">Visa, Mastercard, Amex, RuPay</span>
+                <span class="inline-block text-[10px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">Instant Verification</span>
+              </div>
+            </label>
+
+            <label class="flex items-start space-x-3 p-4 rounded-2xl border border-slate-200 hover:border-slate-300 bg-white cursor-pointer">
+              <input type="radio" name="paymentMethod" value="UPI / QR Code" class="mt-1 accent-brand-600">
+              <div class="space-y-1 text-xs">
+                <span class="font-bold text-slate-900 block text-sm">Instant UPI / QR Code</span>
+                <span class="text-slate-500 block">Google Pay, PhonePe, Paytm</span>
+              </div>
+            </label>
+
+            <label class="flex items-start space-x-3 p-4 rounded-2xl border border-slate-200 hover:border-slate-300 bg-white cursor-pointer">
+              <input type="radio" name="paymentMethod" value="Net Banking" class="mt-1 accent-brand-600">
+              <div class="space-y-1 text-xs">
+                <span class="font-bold text-slate-900 block text-sm">Net Banking</span>
+                <span class="text-slate-500 block">All Major Financial Institutions</span>
+              </div>
+            </label>
+
+            <label class="flex items-start space-x-3 p-4 rounded-2xl border border-slate-200 hover:border-slate-300 bg-white cursor-pointer">
+              <input type="radio" name="paymentMethod" value="Cash on Delivery" class="mt-1 accent-brand-600">
+              <div class="space-y-1 text-xs">
+                <span class="font-bold text-slate-900 block text-sm">Cash / Pay on Delivery</span>
+                <span class="text-slate-500 block">Pay via cash or UPI at your door</span>
+              </div>
+            </label>
+
+          </div>
+        </div>
+
+        <!-- Order Summary Breakdown -->
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+          <div class="font-bold text-slate-700 text-sm mb-1">Order Summary</div>
+          <div class="flex justify-between text-slate-600">
+            <span>Items Subtotal</span>
+            <span id="checkoutSubtotal" class="font-semibold text-slate-800">$0.00</span>
+          </div>
+          <div class="flex justify-between text-emerald-600">
+            <span>Gift Points Discount</span>
+            <span id="checkoutDiscount" class="font-semibold">-$0.00</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>Shipping & Handling</span>
+            <span id="checkoutShipping" class="font-semibold text-slate-800">FREE</span>
+          </div>
+          <div class="pt-2 border-t border-slate-200 flex justify-between text-sm font-bold text-slate-900">
+            <span>Total Payable Amount</span>
+            <span id="checkoutFinalTotal" class="text-brand-600 text-base">$0.00</span>
+          </div>
+          <div class="text-[11px] text-amber-700 flex items-center space-x-1 pt-1">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span>You will earn <strong id="checkoutPointsToEarn">0 points</strong> on this order!</span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+          <button onclick="app.backToAddressStep()" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-xs hover:bg-slate-100">
+            ← Back to Address
+          </button>
+          <button onclick="app.submitPayment()" id="payNowBtn" class="px-8 py-3.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm shadow-lg shadow-brand-600/30 transition flex items-center space-x-2">
+            <i data-lucide="lock" class="w-4 h-4"></i>
+            <span>Authorize & Place Order</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Checkout Step 3: Payment Confirmation & Processing Animation (Step 11) -->
+      <div id="checkoutStepProcessing" class="py-12 text-center space-y-4 hidden">
+        <div class="w-16 h-16 rounded-full border-4 border-brand-200 border-t-brand-600 animate-spin mx-auto"></div>
+        <h3 class="text-xl font-serif font-bold text-slate-900">Processing Secure Payment...</h3>
+        <p class="text-xs text-slate-500 max-w-sm mx-auto">
+          Contacting merchant gateway with 256-bit encryption. Confirming your book reservations and applying points.
+        </p>
+      </div>
+
+      <!-- Checkout Step 4: Purchase Confirmation with 48-hr Cancel (Step 11 & 12) -->
+      <div id="checkoutStepSuccess" class="space-y-6 hidden">
+        <!-- Rendered by app.renderOrderSuccess() -->
+      </div>
+
+    </div>
+  </div>
+
+  <!-- User Login / Register Modal (Step 1) -->
+  <div id="loginModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 p-6 sm:p-8 relative">
+      <button onclick="app.closeLoginModal()" class="absolute top-5 right-5 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="text-center space-y-2 mb-6">
+        <div class="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center mx-auto mb-2">
+          <i data-lucide="user-check" class="w-6 h-6"></i>
+        </div>
+        <h2 class="text-2xl font-serif font-bold text-slate-900" id="authModalTitle">Welcome to PageTurner</h2>
+        <p class="text-xs text-slate-500">Sign in to track orders, redeem gift points, and get personalized recommendations</p>
+      </div>
+
+      <!-- Quick Demo Users Selection -->
+      <div class="mb-4 p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Quick Sign In as Demo User:</div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="app.quickLoginDemo('jane@example.com', 'password123')" class="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-brand-500 hover:bg-brand-50/50 text-left transition">
+            <div class="font-bold text-slate-800">Jane Doe</div>
+            <div class="text-[10px] text-amber-600 font-semibold">480 Gift Pts • 2 Orders</div>
+          </button>
+          <button onclick="app.quickLoginDemo('alex@example.com', 'password123')" class="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-brand-500 hover:bg-brand-50/50 text-left transition">
+            <div class="font-bold text-slate-800">Alex Rivera</div>
+            <div class="text-[10px] text-amber-600 font-semibold">150 Gift Pts</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Login Form -->
+      <form id="authForm" onsubmit="app.handleAuthSubmit(event)" class="space-y-3 text-xs">
+        <div id="authNameField" class="hidden space-y-1">
+          <label class="font-bold text-slate-700">Full Name</label>
+          <input type="text" id="authNameInput" placeholder="e.g. Sarah Connor" class="w-full p-2.5 rounded-xl border border-slate-200 bg-white outline-none focus:border-brand-500">
+        </div>
+        <div class="space-y-1">
+          <label class="font-bold text-slate-700">Email Address</label>
+          <input type="email" id="authEmailInput" required placeholder="jane@example.com" class="w-full p-2.5 rounded-xl border border-slate-200 bg-white outline-none focus:border-brand-500">
+        </div>
+        <div class="space-y-1">
+          <label class="font-bold text-slate-700">Password</label>
+          <input type="password" id="authPasswordInput" required placeholder="••••••••" class="w-full p-2.5 rounded-xl border border-slate-200 bg-white outline-none focus:border-brand-500">
+        </div>
+        <button type="submit" id="authSubmitBtn" class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm shadow-md transition mt-4">
+          Sign In
+        </button>
+      </form>
+
+      <div class="text-center pt-4 text-xs text-slate-500">
+        <span id="authToggleText">Don't have an account?</span>
+        <button onclick="app.toggleAuthMode()" id="authToggleBtn" class="font-bold text-brand-600 hover:underline ml-1">Create one</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cancel Order Modal (Step 12: Cancel Order Within 48 hrs) -->
+  <div id="cancelOrderModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 p-6 sm:p-8 relative">
+      <button onclick="app.closeCancelModal()" class="absolute top-5 right-5 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="text-center space-y-2 mb-4">
+        <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-2">
+          <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+        </div>
+        <h2 class="text-xl font-serif font-bold text-slate-900">Cancel Order</h2>
+        <p class="text-xs text-slate-500">Order <span id="cancelModalOrderId" class="font-bold text-slate-800">#ORD</span> is within the 48-hour cancellation guarantee.</p>
+      </div>
+
+      <div class="bg-amber-50 p-3 rounded-2xl border border-amber-200 text-xs text-amber-800 mb-4 space-y-1">
+        <div class="font-bold flex items-center space-x-1">
+          <i data-lucide="info" class="w-3.5 h-3.5"></i>
+          <span>Instant Full Refund & Points Reversal</span>
+        </div>
+        <p class="text-[11px] text-amber-700">Your original payment method will be credited 100%, and any redeemed gift points will be immediately restored to your account.</p>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <label class="font-bold text-slate-700 block">Select Reason for Cancellation:</label>
+        <select id="cancelReasonSelect" class="w-full p-2.5 rounded-xl border border-slate-200 bg-white outline-none text-slate-700">
+          <option value="Ordered by mistake / Change of mind">Ordered by mistake / Change of mind</option>
+          <option value="Found a cheaper price elsewhere">Found a cheaper price elsewhere</option>
+          <option value="Delivery date is too late for my needs">Delivery date is too late for my needs</option>
+          <option value="Need to change shipping address">Need to change shipping address</option>
+          <option value="Other reason">Other reason</option>
+        </select>
+
+        <button onclick="app.confirmCancellation()" class="w-full py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-sm shadow-md transition mt-2">
+          Confirm Cancellation
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- Footer -->
+  <footer class="bg-slate-900 text-slate-400 text-xs py-10 mt-auto border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-800 pb-6">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold">
+            <i data-lucide="book-marked" class="w-4 h-4"></i>
+          </div>
+          <span class="text-base font-serif font-bold text-white">PageTurner Online Bookstore</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-4 text-slate-400">
+          <span>✓ 48-Hour Free Cancellation</span>
+          <span>✓ Tentative Delivery Estimates</span>
+          <span>✓ Loyalty Gift Points Program</span>
+          <span>✓ 100% Genuine Publisher Editions</span>
+        </div>
+      </div>
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-slate-500 text-[11px]">
+        <span>© 2025 PageTurner Bookstore E-Store. All rights reserved.</span>
+        <span>Built with IBM BOB Agentic IDE</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>
